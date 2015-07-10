@@ -1,20 +1,49 @@
 import socket
+import DiffieHellman
+import json
 
 
-def start_client(ip):
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect((ip, 50000))
+class Client:
+    def __init__(self):
+        self.__dh = DiffieHellman.DH()
 
-    try:
-        while True:
-            msg = input("Message: ")
+    def initDiffieHellman(self, socket):
 
-            if not msg:
-                break
+        # Step1: recive the shared primes and the public secret
+        step1 = socket.recv(1024)
+        print(step1)
 
-            sock.send(msg.encode())
-            answer = sock.recv(1024)
-            print(answer.decode())
+        # Step 1.1: Parse them
+        jsonData = json.load(step1.decode())["dh-keyexchange"]
 
-    finally:
-        sock.close()
+        base = int(jsonData["base"])
+        sharedPrime = int(jsonData["prime"])
+        publicSecret = int(jsonData["publicSecret"])
+
+        # Step2: calculate public secret and send to server
+        step2 = self.__dh.calcPublicSecret(base, sharedPrime)
+        print(step2)
+        socket.send(step2.encode())
+
+        # Step3: calculate the shared secret
+        self.__dh.calcSharedSecret(publicSecret)
+
+    def start_client(self, ip):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sock.connect((ip, 50000))
+
+        self.initDiffieHellman(sock)
+
+        try:
+            while True:
+                msg = input("Message: ")
+
+                if not msg:
+                    break
+
+                sock.send(msg.encode())
+                answer = sock.recv(1024)
+                print(answer.decode())
+
+        finally:
+            sock.close()
