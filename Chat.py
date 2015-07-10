@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 
 
 parser = ArgumentParser()
-parser.add_argument("-m", "--mode", dest="mode", type=str,
+parser.add_argument("-m", "--mode", dest="mode", type=str, required=True,
                     help="CLIENT to start a client or SERVER to start a server"
                     )
 
