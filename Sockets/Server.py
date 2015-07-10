@@ -1,34 +1,42 @@
 import socketserver
-import DiffieHellman
+from DiffieHellman import DiffieHellman
 from KryptoMath import Prime
 
 
 class ChatSocket(socketserver.BaseRequestHandler):
-    def __init__(self):
-        self.__dh = DiffieHellman.DH()
-
     """
     Diffie Hellman schlüsselaustausch durchführen
     """
     def initDiffieHellman(self):
-        base = Prime.rand_prime(200)
-        sharedPrime = Prime.rand_prime(200)
-        publicSecret = self.__dh.calcPublicSecret(base, sharedPrime)
+        if self.request.recv(1024).decode() != "connected":
+            print("Error while connecting")
+
+        dh = DiffieHellman.DH()
+
+        base = int(Prime.rand_prime(200))
+        sharedPrime = int(Prime.rand_prime(200))
+        publicSecret = dh.calcPublicSecret(base, sharedPrime)
 
         # Step1: share primes and public secret
-        step1 = "{\"dh-keyexchange\":{\"base\": {0},\"prime\": {1},\"\
-                publicSecret\": {2}}}".format(base,
-                                              sharedPrime,
-                                              publicSecret)
+        step1 = "{"
+        step1 += "\"dh-keyexchange\":"
+        step1 += "{"
+        step1 += "\"base\": {},".format(base)
+        step1 += "\"prime\": {},".format(sharedPrime)
+        step1 += "\"publicSecret\": {}".format(publicSecret)
+        step1 += "}}"
         print(step1)
         self.request.send(step1.encode())
 
         # step2: recive the public secret from client
         step2 = self.request.recv(1024)
-        print(step1)
+        step2 = int(step2.decode())
+        print(step2)
 
         # step3: calculate the shared secret
-        self.__dh.calcSharedSecret(step2.decode())
+        dh.calcSharedSecret(step2)
+
+        return dh
 
     def handle(self):
         ip = self.client_address[0]

@@ -13,7 +13,8 @@ print(args)
 
 if args.mode.lower() == "client":
     server = input("Server IP: ")
-    Client.start_client(server)
+    client = Client.Client()
+    client.start_client(server)
 
 elif args.mode.lower() == "server":
     Server.start_server()

@@ -2,6 +2,9 @@ from random import randrange
 
 
 def is_prime(number):
+    if 0 <= number <= 2:
+        return False
+
     # http://de.wikipedia.org/wiki/Sieb_des_Eratosthenes
 
     primes = []

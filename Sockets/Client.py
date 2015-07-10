@@ -1,5 +1,5 @@
 import socket
-import DiffieHellman
+from DiffieHellman import DiffieHellman
 import json
 
 
@@ -9,19 +9,22 @@ class Client:
 
     def initDiffieHellman(self, socket):
 
+        socket.send("connected".encode())
+
         # Step1: recive the shared primes and the public secret
         step1 = socket.recv(1024)
         print(step1)
 
         # Step 1.1: Parse them
-        jsonData = json.load(step1.decode())["dh-keyexchange"]
+        jsonData = json.loads(step1.decode())
+        jsonData = jsonData["dh-keyexchange"]
 
         base = int(jsonData["base"])
         sharedPrime = int(jsonData["prime"])
         publicSecret = int(jsonData["publicSecret"])
 
         # Step2: calculate public secret and send to server
-        step2 = self.__dh.calcPublicSecret(base, sharedPrime)
+        step2 = str(self.__dh.calcPublicSecret(base, sharedPrime))
         print(step2)
         socket.send(step2.encode())
 
