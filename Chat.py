@@ -12,7 +12,7 @@ args = parser.parse_args()
 print(args)
 
 if args.mode.lower() == "client":
-    server = input("Server IP: ")
+    server = "localhost" # input("Server IP: ")
     client = Client.Client()
     client.start_client(server)
 
