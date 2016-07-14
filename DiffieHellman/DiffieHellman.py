@@ -19,4 +19,3 @@ class DH:
 	"""
 	def calcSharedSecret(self, privSecret):
 		self.key = (privSecret ** self.privatePrime) % self.sharedPrime
-		print(self.key)

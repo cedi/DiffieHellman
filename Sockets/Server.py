@@ -37,27 +37,19 @@ class ChatSocket(socketserver.BaseRequestHandler):
 
 		# step3: calculate the shared secret
 		self.__dh.calcSharedSecret(publicSecret)
+		print("The secret key is {}".format(self.__dh.key))
 
+	# Client connected
 	def handle(self):
 		self.__dh = DiffieHellman.DH()
 
-		ip = self.client_address[0]
-		print("[{}] Client connected.".format(ip))
+		# print the Client-IP
+		print("[{}] Client connected.".format(self.client_address[0]))
 
+		# init
 		self.initDiffieHellman()
 
-		while True:
-			message = self.request.recv(1024)
-
-			if message:
-				print("[{}]: {}".format(ip, message.decode()))
-				self.request.send("recived".encode())
-
-			else:
-				print("[{}]: Client disconnected".format(ip))
-				break
-
-
 def start_server():
+	# start the server and serve forever
 	server = socketserver.ThreadingTCPServer(("", 50000), ChatSocket)
 	server.serve_forever()

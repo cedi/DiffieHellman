@@ -35,23 +35,15 @@ class Client:
 
 		# Step3: calculate the shared secret
 		self.__dh.calcSharedSecret(publicSecret)
+		print("The secret key is {}".format(self.__dh.key))
 
 	def start_client(self, ip):
+		# Start the Socket
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		sock.connect((ip, 50000))
 
+		# Start the Key-Exchange
 		self.initDiffieHellman(sock)
 
-		try:
-			while True:
-				msg = input("Message: ")
-
-				if not msg:
-					break
-
-				sock.send(msg.encode())
-				answer = sock.recv(1024)
-				print(answer.decode())
-
-		finally:
-			sock.close()
+		# Close the Socket
+		sock.close()
