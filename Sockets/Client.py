@@ -3,9 +3,10 @@ from DiffieHellman import DiffieHellman
 import json
 
 
-class Client:
-	def __init__(self):
+class ClientSocket:
+	def __init__(self, debugflag):
 		self.__dh = DiffieHellman.DH()
+		self.__debugflag = debugflag
 
 	def initDiffieHellman(self, socket):
 
@@ -13,7 +14,9 @@ class Client:
 
 		# Step1: recive the shared primes and the public secret
 		step1 = socket.recv(1024)
-		print(step1)
+
+		if self.__debugflag:
+			print(step1)
 
 		# Step 1.1: Parse them
 		jsonData = json.loads(step1.decode())
@@ -35,15 +38,17 @@ class Client:
 
 		# Step3: calculate the shared secret
 		self.__dh.calcSharedSecret(publicSecret)
-		print("The secret key is {}".format(self.__dh.key))
 
 	def start_client(self, ip):
 		# Start the Socket
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		sock.connect((ip, 50000))
+		try:
+			sock.connect((ip, 50000));
 
-		# Start the Key-Exchange
-		self.initDiffieHellman(sock)
+			# Start the Key-Exchange
+			self.initDiffieHellman(sock)
+			print("The secret key is {}".format(self.__dh.key))
 
-		# Close the Socket
-		sock.close()
+		finally:
+			# Close the Socket
+			sock.close()

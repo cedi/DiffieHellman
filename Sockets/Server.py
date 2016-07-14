@@ -4,7 +4,7 @@ from KryptoMath import Prime
 import json
 
 
-class ChatSocket(socketserver.BaseRequestHandler):
+class ServerSocket(socketserver.BaseRequestHandler):
 	"""
 	Diffie Hellman schlüsselaustausch durchführen
 	"""
@@ -27,7 +27,9 @@ class ChatSocket(socketserver.BaseRequestHandler):
 
 		# step2: recive the public secret from client
 		step2 = self.request.recv(1024)
-		print(step2)
+
+		if self.__debugflag:
+			print(step2)
 
 		# step 2.1 Parse them
 		jsonData = json.loads(step2.decode())
@@ -37,10 +39,10 @@ class ChatSocket(socketserver.BaseRequestHandler):
 
 		# step3: calculate the shared secret
 		self.__dh.calcSharedSecret(publicSecret)
-		print("The secret key is {}".format(self.__dh.key))
 
 	# Client connected
 	def handle(self):
+		self.__debugflag = self.server.conn
 		self.__dh = DiffieHellman.DH()
 
 		# print the Client-IP
@@ -48,8 +50,14 @@ class ChatSocket(socketserver.BaseRequestHandler):
 
 		# init
 		self.initDiffieHellman()
+		print("> The secret key is {}\n".format(self.__dh.key))
 
-def start_server():
+def start_server(debugflag):
 	# start the server and serve forever
-	server = socketserver.ThreadingTCPServer(("", 50000), ChatSocket)
+	server = socketserver.ThreadingTCPServer(("", 50000), ServerSocket)
+
+	# pass the debug-flag to the SocketServer-Class
+	server.conn = debugflag
+
+	# And serve
 	server.serve_forever()
